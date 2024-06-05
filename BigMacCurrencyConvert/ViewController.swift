@@ -47,12 +47,16 @@ class ViewController: UIViewController {
         toCountryLabel.textColor = .white
         toCountryLabel.font = UIFont.systemFont(ofSize: 14)
         toCountryLabel.translatesAutoresizingMaskIntoConstraints = false
+        toCountryLabel.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toCountryLabelTapped))
+        toCountryLabel.addGestureRecognizer(tapGesture)
         view.addSubview(toCountryLabel)
 
         countryPickerView.dataSource = self
         countryPickerView.delegate = self
-        view.addSubview(countryPickerView)
         countryPickerView.translatesAutoresizingMaskIntoConstraints = false
+        countryPickerView.isHidden = true // 클릭을 해야 피커가 나옴
+        view.addSubview(countryPickerView)
 
         fromAmountTextField.text = "1,300,000"
         fromAmountTextField.textColor = .white
@@ -141,6 +145,10 @@ class ViewController: UIViewController {
         ])
     }
 
+    @objc func toCountryLabelTapped() {
+        countryPickerView.isHidden = !countryPickerView.isHidden
+    }
+
     @objc func exchangeButtonTapped() {
         guard let fromAmountText = fromAmountTextField.text, let fromAmount = Double(fromAmountText.replacingOccurrences(of: ",", with: "")) else { return }
 
@@ -153,7 +161,21 @@ class ViewController: UIViewController {
     }
 
     @objc func showTooltip() {
-        let alert = UIAlertController(title: "빅맥지수란?", message: "이것은 빅맥지수입니다.", preferredStyle: .alert)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+
+        let title = "빅맥지수란?"
+        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 17, weight: .bold)]
+        let attributedTitle = NSMutableAttributedString(string: title, attributes: titleFont)
+
+        let attachment = NSTextAttachment()
+        attachment.image = UIImage(systemName: "questionmark.circle")
+        attachment.bounds = CGRect(x: 0, y: -2, width: 20, height: 20)
+        let imageString = NSAttributedString(attachment: attachment)
+        attributedTitle.append(NSAttributedString(string: " "))
+        attributedTitle.append(imageString)
+
+        alert.setValue(attributedTitle, forKey: "attributedTitle")
+        alert.message = "이것은 빅맥지수입니다."
         alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
@@ -177,5 +199,6 @@ extension ViewController: UIPickerViewDataSource, UIPickerViewDelegate {
         let selectedCountry = countries[row]
         toCountryLabel.textColor = .white
         toCountryLabel.text = "\(selectedCountry.flag) \(selectedCountry.name)"
+        countryPickerView.isHidden = true
     }
 }
